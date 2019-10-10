@@ -31,56 +31,49 @@ function roadsAndLibraries(n, c_lib, c_road, cities) {
         return c_lib * n
     }
 
-    let visitedCities = new Set()
+    // build a better graph
+    const cityList = []
+    for(let i = 1; i <= n; i++) { 
+        cityList[i] = []
+    }
 
-    // calcuate road cycles
-    let cycles = 0
+    for(let i = 0; i < cities.length; i++) {
+        cityList[cities[i][0]].push(cities[i][1]) 
+        cityList[cities[i][1]].push(cities[i][0]) 
+    }
 
-    // calculate unconnected systems
-    let systems = 0
+    let cost = 0
+    const visitedCities = []
 
     // traverse each node not visited
-    for(let i = 0; i < cities.length; i++) {
+    for(let i = 1; i <= n; i++) {
         
-        if (visitedCities.has(cities[i][0])) {
+        // if we have visited the city group
+        if (visitedCities[i]) {
             continue;
         }
 
-        let stack = [cities[i][0]]
-        systems++
+        cost += c_lib
 
+        const stack = [i]
         while (stack.length > 0) {
             const city = stack.pop()
-            // console.log(city)
-            // console.log(visitedCities)
-            if (visitedCities.has(city)) {
-                cycles++
-            } else {
-                visitedCities.add(city)
-            
-                // push connected cities
-                for(let j = 0; j < cities.length; j++) {
-                    // the node is the city and the other node has not been visited 
-                     console.log(n, j, cities[j])
-                    // console.log(visitedCities)
-                    if (cities[j][0] == city && !visitedCities.has(cities[j][1])) {
-                        stack.push(cities[j][1])
-                    }
 
-                    if (cities[j][1] == city && !visitedCities.has(cities[j][0])) {
-                        stack.push(cities[j][0])
-                    }
+            visitedCities[city] = true
+
+            const connectedCities = cityList[city]
+            for(let j = 0; j < connectedCities.length; j++){
+                if (visitedCities[connectedCities[j]]) {
+                    continue;
                 }
+                stack.push(connectedCities[j])
+                visitedCities[connectedCities[j]] = true
+                cost += c_road
             }
         }
     }
 
-    // console.log(n)
-    // console.log(cycle)
-    // // console.log(c_road)
-    // console.log(systems)
-    // console.log(c_lib)
-    return (cities.length - cycles) * c_road + (n - visitedCities.size + systems) * c_lib
+    return cost
 }
 
 function main() {
